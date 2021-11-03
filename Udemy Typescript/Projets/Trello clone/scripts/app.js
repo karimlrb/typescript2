@@ -6,15 +6,27 @@ function addContainerListeners(currentContainer) {
     // On trouve le bon bouton ici
     const currentContainerDeletionBtn = currentContainer.querySelector('.delete-container-btn');
     const currentAddItemBtn = currentContainer.querySelector('.add-item-btn');
+    const currentCloseFormBtn = currentContainer.querySelector('.close-form-btn');
+    const currentForm = currentContainer.querySelector('form');
     // On lui rajoute l'eventListeners
     deleteBtnListeners(currentContainerDeletionBtn);
     addItemBtnListeners(currentAddItemBtn);
+    closingFormBtnListeners(currentCloseFormBtn);
+    addFormSubmitListeners(currentForm);
 }
 function deleteBtnListeners(btn) {
     btn.addEventListener("click", handleContainerDeletion);
 }
 function addItemBtnListeners(btn) {
     btn.addEventListener("click", handleAddItem);
+}
+// Si on a accès au bouton c'est q'un formulaire est ouvert(de base le bouton & form sont caché)
+// On a plus qu'a toggleForm le form ouvert
+function closingFormBtnListeners(btn) {
+    btn.addEventListener("click", () => toggleForm(actualBtn, actualForm, false));
+}
+function addFormSubmitListeners(form) {
+    form.addEventListener("submit", createNewItem);
 }
 itemsContainer.forEach((container) => {
     addContainerListeners(container);
@@ -54,4 +66,38 @@ function setContainerItems(btn) {
     actualForm = actualContainer.querySelector('form');
     actualTextInput = actualContainer.querySelector('input');
     actualValidation = actualContainer.querySelector('.validation-msg');
+}
+function createNewItem(e) {
+    // Sinon la page va se refresh
+    e.preventDefault();
+    // Validation
+    if (actualTextInput.value.length === 0) {
+        actualValidation.textContent = "Must be at least 1 character long";
+        // Après l'erreur on sort, on ne veut pas lire la suite
+        return;
+    }
+    else {
+        // Si on avait le message d'erreur et qu'on re submit il faut vider le message
+        actualValidation.textContent = "";
+    }
+    // Création Item
+    const itemContent = actualTextInput.value;
+    const li = `<li class="item" draggable="true">
+                <p>${itemContent}</p>
+                <button>x</button>
+              </li>
+             `;
+    actualUL.insertAdjacentHTML("beforeend", li);
+    const item = actualUL.lastElementChild;
+    const liBtn = item.querySelector('button');
+    handleItemDeletion(liBtn);
+    actualTextInput.value = "";
+}
+// On prend le bouton qui est fourni par handleItmDeletion(btn) plus haut
+// Le parent du bouton est le LI qu'on veut remove
+function handleItemDeletion(btn) {
+    btn.addEventListener("click", () => {
+        const liToRemove = btn.parentElement;
+        liToRemove.remove();
+    });
 }
