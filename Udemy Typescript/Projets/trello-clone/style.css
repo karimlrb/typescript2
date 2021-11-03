@@ -10,8 +10,8 @@ body {
   height: 100%;
 }
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #424141;
+  font-family: sans-serif;
+  background-color: #069dff69;
 }
 nav {
   background-color: #f2f2f2;
@@ -73,6 +73,9 @@ li button {
   padding: 10px 0;
   margin-top: 20px;
   font-size: 16px;
+  background: #16355a;
+  color: #fff;
+  border-radius: 5px;
 }
 form {
   display: none;
@@ -94,6 +97,7 @@ form {
   width: 100%;
   padding: 5px;
   font-size: 16px;
+  border-radius: 5px;
 }
 .validation-msg {
   display: block;
@@ -105,8 +109,11 @@ form {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
+  background-color: crimson;
+  color: #fff;
+  border-radius: 7px;
 }
 button[type="submit"] {
   background-color: lightgreen;
@@ -115,6 +122,9 @@ button[type="submit"] {
   padding: 10px 0;
   margin-top: 5px;
   cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+  color: #000;
 }
 
 /* Add New Container */
