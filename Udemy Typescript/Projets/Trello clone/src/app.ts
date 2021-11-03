@@ -19,7 +19,12 @@ function addContainerListeners(currentContainer:HTMLDivElement){
     addItemBtnListeners(currentAddItemBtn);
     closingFormBtnListeners(currentCloseFormBtn)
     addFormSubmitListeners(currentForm);
+    addDDListeners(currentContainer);
 }
+
+itemsContainer.forEach((container:HTMLDivElement) => {
+    addContainerListeners(container);
+})
 
 function deleteBtnListeners(btn: HTMLButtonElement){
     btn.addEventListener("click", handleContainerDeletion);
@@ -39,9 +44,13 @@ function addFormSubmitListeners(form: HTMLFormElement){
     form.addEventListener("submit", createNewItem)
 }
 
-itemsContainer.forEach((container:HTMLDivElement) => {
-    addContainerListeners(container);
-})
+// Attention Ici NE PAS METTRE DRAGDROP mais DROP!!!!!!
+function addDDListeners(element:HTMLElement) {
+    element.addEventListener('dragstart', handleDragStart);
+    element.addEventListener('dragover', handleDragOver);
+    element.addEventListener('drop', handleDrop);
+    element.addEventListener('dragend', handleDragEnd);
+}
 
 function handleContainerDeletion(e :MouseEvent){
     // btn est le bouton sur lequel on a cliqué
@@ -105,6 +114,7 @@ function createNewItem(e:Event) {
     const item = actualUL.lastElementChild as HTMLLIElement;
     const liBtn = item.querySelector('button') as HTMLButtonElement;
     handleItemDeletion(liBtn);
+    addDDListeners(item);
     actualTextInput.value = "";
 
 }
@@ -116,6 +126,109 @@ function handleItemDeletion(btn:HTMLButtonElement){
         liToRemove.remove();
     } )
 }
+
+// Drag and Drop
+
+let dragSrcEl:HTMLElement;
+// this:Element doit être en premier, c'est l'élément qu'on prend
+function handleDragStart(this:HTMLElement, e:DragEvent){
+    e.stopPropagation();
+
+    if(actualContainer) toggleForm(actualBtn,actualForm,false);
+    dragSrcEl = this;
+    // On copie l'innerHTML de l'élément soulevé
+    e.dataTransfer?.setData('text/html', this.innerHTML)
+}
+
+function handleDragOver(e:DragEvent){
+    // Sans le e.preventDefault() ça ne fonctionne pas/ permet de le drop somewhere
+    e.preventDefault();
+}
+
+// Function la plus IMPORTANTE, On drop notre element
+function handleDrop(this:HTMLElement, e:DragEvent){
+    e.stopPropagation();
+    // Ici this est la reception, plus haut c'est ce qu'on prend/dépalce
+    const receptionEl = this;
+    // Si on prend un LI et in le drop dans un container
+    if (dragSrcEl.nodeName==="LI" && receptionEl.classList.contains(("items-container"))) {
+        (receptionEl.querySelector('ul')as HTMLUListElement).appendChild(dragSrcEl);
+        // Quand on drag and drop les éléments disparaisse donc on les rajoutes a élément drop
+        addDDListeners(dragSrcEl);
+        handleItemDeletion(dragSrcEl.querySelector("button") as HTMLButtonElement);
+    }
+    // Si l'élément que je veux glisser != là ou je veut le poser 
+    // Et que les classes coresspondent, ca veut dire c'est un contenair que je veux swap avec un container ou un item avec un item
+    if (dragSrcEl !== this && this.classList[0]===dragSrcEl.classList[0]) {
+        dragSrcEl.innerHTML = this.innerHTML;
+        // On prend les data qu'on à save quand on à start à glisser l'élément
+        // On va avoir l'illusion qu'on les swap alors qu'on change juste linnerHTML
+        this.innerHTML = e.dataTransfer?.getData('text/html') as string;
+        // Après le swap on rajoute les events
+        if (this.classList.contains('items-container')) {
+            addContainerListeners(this as HTMLDivElement)
+
+            this.querySelectorAll('li').forEach((li:HTMLLIElement) => {
+                handleItemDeletion(li.querySelector('button') as HTMLButtonElement);
+                addDDListeners(li);
+            })
+        } else {
+            addDDListeners(this);
+            handleItemDeletion(this.querySelector('button') as HTMLButtonElement)
+        }
+    }
+}
+// Il faut cette function car les éléments qui ont swapé ont leur a donnés les addEventLi..
+// Mais l'élément qui s'est fait swapé on lui à pas donné, on lui juste changer son HTML
+function handleDragEnd(this:HTMLElement, e:DragEvent) {
+    e.stopPropagation();
+    // Si l'élmt qui se fait swap est un container on lui ajoute les eventsListeners
+    if (this.classList.contains('items-container')) {
+        addContainerListeners(this as HTMLDivElement);
+        this.querySelectorAll('li').forEach((li:HTMLLIElement) => {
+            handleItemDeletion(li.querySelector('button') as HTMLButtonElement);
+            addDDListeners(li);
+        })
+    }
+    else {
+        addDDListeners(this);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //  Add New Container
 const addContainerBtn = document.querySelector('.add-container-btn') as HTMLButtonElement;
